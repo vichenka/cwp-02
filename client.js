@@ -1,62 +1,53 @@
-// client.js
-const fs = require('fs');
+
 const net = require('net');
+const fs = require('fs');
 const port = 8124;
+const initialString = 'QA';
+const ANSWER_IS_FALSE = 'DEC';
+const ANSWER_IS_TRUE = 'ACK';
 
 const client = new net.Socket();
-
-let q = [];
-let index = 0;
-
-const CLIENT_NAME = "CLIENT";
-const SERVER_NAME = "SERVER";
-
-const rand_Ans = "UNKNOWN";
-const QUESTION = "QA";
-const ANSWER_IS_RIGHT = "ACK";
-const ANSWER_IS_FALSE = "DEC";
-
+let currentIndex = -1;
 client.setEncoding('utf8');
 
-client.connect(port, function() {
-    fs.readFile("qa.json", (err,data)=>{
-        if(err){throw err;}
-        else{
-            q = JSON.parse(data);
-            q = q.sort(RANDOMMASSIVE);
-            client.write(QUESTION);
+let questions = [];
+client.connect({port: port, host: '127.0.0.1'}, () => {
+    fs.readFile("qa.json", (err, text) => {
+        if (!err) {
+            questions = JSON.parse(text);
+            client.write(initialString);
         }
-    })
+        else console.error(err);
+    });
 });
 
-client.on('data', function(data) {
-    if(data === ANSWER_IS_RIGHT){
-        client.write(q[0].question);
-    }
-    if(data === ANSWER_IS_FALSE){
+client.on('data', (data) => {
+    if (data === ANSWER_IS_FALSE)
         client.destroy();
-        process.terminate();
+    if (data === ANSWER_IS_TRUE)
+        sendQuestion();
+    else {
+        let qst = questions[currentIndex];
+        let answer = qst.good;
+        console.log('\n' + qst.quest);
+        console.log('Answer:' + data);
+        console.log('Server:' + answer);
+        console.log('Result:' + (data === answer ? 'It is a right answer': 'Bad answer'));
+        sendQuestion();
     }
-    if(data !== ANSWER_IS_RIGHT){
-        console.log (q[index].question);
-        console.log (data);
-        console.log (data === q[index].answer ? "Right" "Wrong");
-        if((index + 1) === q.length){
-            client.destroy();
-        }
-        else{
-            ++index;
-            client.write(q[index].question);
-            
-        }
-    }
-
 });
 
-client.on('close', function() {
+client.on('close', function () {
     console.log('Connection closed');
 });
 
-function RANDOMMASSIVE(a,b){
-    return Math.random() - 0.5;
+
+
+function sendQuestion() {
+    if (currentIndex < questions.length -1) {
+        let qst = questions[++currentIndex].quest;
+        client.write(qst);
+    }
+    else
+        client.destroy();
 }

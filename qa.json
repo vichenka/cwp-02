@@ -1,19 +1,18 @@
 [
   {
-    "question":"Сколько тигров в кладовой",
-    "answer":"1",
-    "wrong_answer":"2"
+    "quest": "test1",
+    "ans": "1"
   },
-
   {
-    "question":"Сколько зим в одном столетье",
-    "answer":"99.5",
-    "wrong_answer":"100"
+    "quest": "test2",
+    "ans": "1"
   },
-
   {
-    "question":"Вопрос знатокам",
-    "answer":"Есть ответ",
-    "wrong_answer":"Нет, спасибо"
+    "quest" : "test3",
+    "good" : "0"
+  },
+  {
+    "quest" : "test4",
+    "good" : "0"
   }
 ]
